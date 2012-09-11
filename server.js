@@ -87,7 +87,7 @@ http.createServer(function (req, res) {
         else{
             // location can be name in the form of 'lat,lon' or just a 'city name'
             weatherCall(encodeURIComponent(query.location), function(weatherData){
-                weatherData.credits = 'Data is provided by various weather services with current support for Bing/MSN Weather, Google Weather and weather API provided by RedBit Development. Source code available at https://github.com/marteaga/openWeather',
+                weatherData.credits = 'Data is provided by various weather services with current support for Bing/MSN Weather, Google Weather and weather API provided by RedBit Development. Source code available at https://github.com/marteaga/weatherman',
                 cache.put(cacheKey, JSON.stringify(weatherData), cacheTimeout );
                 respondJson({status: 'ok', data: weatherData});
             }, function(err){
