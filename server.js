@@ -55,6 +55,30 @@ http.createServer(function (req, res) {
         res.end();
     }
 
+    function getAqhi(lat, lon, callback){
+        var options=
+        {
+            host: 'aqhi.azurewebsites.net',
+            port: 80,
+            method: 'GET',
+            path: '/find?lat={0}&lon={1}'.format(lat, lon),
+            getUrl: function() {return 'http://{0}{1}'.format(this.host, this.path);}
+        }
+        http.get(options, function(res){
+            res.setEncoding('utf8');
+            var body = '';
+
+            res.on('data',function(chunk){
+                body+=chunk;
+            });
+
+            res.on('end',function(){
+                var data = JSON.parse(body);
+                callback(data);
+            });
+        });
+    }
+
     function getWeather(){
         // determin the type of call
         var weatherCall = getBingWeather;
@@ -86,13 +110,28 @@ http.createServer(function (req, res) {
         }
         else{
             // location can be name in the form of 'lat,lon' or just a 'city name'
-            weatherCall(encodeURIComponent(query.location), function(weatherData){
-                weatherData.credits = 'Data is provided by various weather services with current support for Bing/MSN Weather, Google Weather and weather API provided by RedBit Development. Source code available at https://github.com/marteaga/weatherman',
-                cache.put(cacheKey, JSON.stringify(weatherData), cacheTimeout );
-                respondJson({status: 'ok', data: weatherData});
-            }, function(err){
-                respondJson({status: 'failed', data: err});
-            });
+            weatherCall(encodeURIComponent(query.location),
+                function(weatherData){
+                    // just add some credits so people know where it's coming from
+                    weatherData.credits = 'Data is provided by various weather services with current support for Bing/MSN Weather, Google Weather and weather API provided by RedBit Development. Source code available at https://github.com/marteaga/weatherman';
+
+                    // add the aqhi data from env canada\
+                    if(query.includeaqhi){
+                        getAqhi(weatherData.longitude, weatherData.latitude, function(aqhiData){
+                            weatherData.aqhi = aqhiData;
+                            cache.put(cacheKey, JSON.stringify(weatherData), cacheTimeout );
+                            respondJson({status: 'ok', data: weatherData});
+                        });
+                    }
+                    else{
+                        cache.put(cacheKey, JSON.stringify(weatherData), cacheTimeout );
+                        respondJson({status: 'ok', data: weatherData});
+                    }
+                }, 
+                function(err){
+                    respondJson({status: 'failed', data: err});
+                }
+            );
         }
     };
 
@@ -181,7 +220,6 @@ function getBingWeather(location, callback, errCallback){
                                 var ret = new WeatherData(options.getUrl());
                                 var weatherNode = result.weatherdata.weather[0]['$'];
                                 var currentNode = result.weatherdata.weather[0]['current'][0]['$'];
-                                console.log(currentNode);
                                 ret.city = weatherNode.weatherlocationname;
                                 ret.url  = weatherNode.url;
                                 ret.condition = currentNode.skytext;
@@ -193,6 +231,8 @@ function getBingWeather(location, callback, errCallback){
                                 ret.observationTime = currentNode.observationtime;
                                 ret.date = currentNode.date;
                                 ret.icon = '{0}law/{1}.gif'.format(weatherNode.imagerelativeurl, currentNode.skycode);
+                                ret.longitude = weatherNode.long;
+                                ret.latitude = weatherNode.lat;
                                 callback(ret);
                             }
                         });
@@ -254,6 +294,8 @@ function WeatherData(source){
     this.observationPoint = undefined;
     this.observationTime = undefined;
     this.date = undefined;
+    this.longitude = undefined;
+    this.latitude = undefined;
 }
 
 // format function borrowed from http://stackoverflow.com/questions/610406/javascript-equivalent-to-printf-string-format/4673436#4673436
