@@ -125,8 +125,9 @@ http.createServer(function (req, res) {
                     if(query.includeaqhi){
                         getAqhi(weatherData.latitude, weatherData.longitude, function(aqhiData){
                             weatherData.aqhi = aqhiData;
-                            cache.put(cacheKey, JSON.stringify(weatherData), cacheTimeout );
-                            respondJson({status: 'ok', data: weatherData});
+                            var ret = {status: 'ok', data: weatherData};
+                            cache.put(cacheKey, JSON.stringify(ret), cacheTimeout );
+                            respondJson(ret);
                         });
                     }
                     else{
