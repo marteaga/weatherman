@@ -76,6 +76,12 @@ http.createServer(function (req, res) {
                 var data = JSON.parse(body);
                 callback(data);
             });
+
+            res.on('error',function(err){
+                // just make sure we call back
+                console.log(e.message);
+                callback();
+            })
         });
     }
 
