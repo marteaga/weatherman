@@ -123,7 +123,7 @@ http.createServer(function (req, res) {
 
                     // add the aqhi data from env canada\
                     if(query.includeaqhi){
-                        getAqhi(weatherData.longitude, weatherData.latitude, function(aqhiData){
+                        getAqhi(weatherData.latitude, weatherData.longitude, function(aqhiData){
                             weatherData.aqhi = aqhiData;
                             cache.put(cacheKey, JSON.stringify(weatherData), cacheTimeout );
                             respondJson({status: 'ok', data: weatherData});
