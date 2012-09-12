@@ -55,6 +55,7 @@ http.createServer(function (req, res) {
         res.end();
     }
 
+    // gets aqhi from environment canada
     function getAqhi(lat, lon, callback){
         var options=
         {
@@ -73,8 +74,14 @@ http.createServer(function (req, res) {
             });
 
             res.on('end',function(){
-                var data = JSON.parse(body);
-                callback(data);
+                try{
+                    var data = JSON.parse(body);
+                    callback(data);
+                }
+                catch(e){
+                    console.log(e.message);
+                    callback()
+                }
             });
 
             res.on('error',function(err){
@@ -83,6 +90,11 @@ http.createServer(function (req, res) {
                 callback();
             })
         });
+    }
+
+    // gets industry pollutants from emitter data (canada data)
+    function getIndustryPollutants(lat, lon, callback){
+
     }
 
     function getWeather(){
