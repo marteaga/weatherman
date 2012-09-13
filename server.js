@@ -18,7 +18,7 @@ http.createServer(function (req, res) {
     //console.log(uri);
     //console.log(query);
 
-    
+     
 
     function throw404(msg){
         res.writeHead(404, {
