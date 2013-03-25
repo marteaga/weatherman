@@ -59,7 +59,7 @@ http.createServer(function (req, res) {
     function getAqhi(lat, lon, callback){
         var options=
         {
-            host: 'aqhi.azurewebsites.net',
+            host: 'openaqhi.azurewebsites.net',
             port: 80,
             method: 'GET',
             path: '/find?lat={0}&lon={1}'.format(lat, lon),
