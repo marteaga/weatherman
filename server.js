@@ -185,6 +185,10 @@ function findLocationBing(location, callback, errCallback){
             var body = '';
 
             res.on('data',function(chunk){
+                if(chunk.charCodeAt(0) === 65279){
+                    console.log(chunk.length);
+                    chunk = chunk.slice(1);
+                }
                 body+=chunk;
             });
 
@@ -193,7 +197,7 @@ function findLocationBing(location, callback, errCallback){
                 parser.parseString(body, function(err, result){
                     if(err)
                     {
-                        // there was an error                        
+                        // there was an error   
                         errCallback(err);
                     }
                     else{
@@ -223,6 +227,10 @@ function getBingWeather(location, callback, errCallback){
                     var body = '';
 
                     res.on('data',function(chunk){
+                        if(chunk.charCodeAt(0) === 65279){
+                            console.log(chunk.length);
+                            chunk = chunk.slice(1);
+                        }
                         body+=chunk;
                     });
 
